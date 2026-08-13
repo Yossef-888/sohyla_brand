@@ -110,6 +110,7 @@
             align-items: center;
             gap: 6px;
             transition: transform 0.3s;
+            white-space: nowrap;
         }
 
         .whatsapp-link-btn:hover { transform: scale(1.05); }
@@ -128,6 +129,7 @@
             align-items: center;
             gap: 8px;
             transition: all 0.3s ease;
+            white-space: nowrap;
         }
 
         .cart-trigger-btn:hover {
@@ -542,6 +544,22 @@
 
         .admin-drawer.active { left: 0; }
 
+        /* Order Status Badge / Select */
+        .status-select {
+            padding: 6px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border-light);
+            font-family: var(--font-arabic);
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            background: #fff;
+        }
+
+        .status-select.status-prep { color: #b45309; border-color: #b45309; }
+        .status-select.status-shipped { color: #15803d; border-color: #15803d; }
+        .status-select.status-cancelled { color: #dc2626; border-color: #dc2626; }
+
         /* Footer Signature */
         footer {
             background: #FFFFFF;
@@ -571,6 +589,44 @@
             .modal-media-side { height: auto; }
             .cart-drawer { width: 100%; }
         }
+
+        /* Mobile / Portrait header fix */
+        @media (max-width: 600px) {
+            .nav-container {
+                padding: 14px 16px;
+                gap: 10px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .brand-logo {
+                font-size: 20px;
+            }
+
+            .header-actions {
+                gap: 8px;
+            }
+
+            .whatsapp-link-btn {
+                padding: 7px 10px;
+                font-size: 12px;
+            }
+
+            .whatsapp-link-btn span.wa-text {
+                display: none;
+            }
+
+            .cart-trigger-btn {
+                padding: 7px 12px;
+                font-size: 12px;
+            }
+
+            .hero-title {
+                font-size: 32px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -589,7 +645,7 @@
 
             <div class="header-actions">
                 <a href="https://wa.me/201021307469" target="_blank" class="whatsapp-link-btn">
-                    <i class="fa-brands fa-whatsapp"></i> WhatsApp
+                    <i class="fa-brands fa-whatsapp"></i> <span class="wa-text">WhatsApp</span>
                 </a>
 
                 <button class="cart-trigger-btn" onclick="openCartDrawer()">
@@ -759,7 +815,7 @@
 
     <!-- Admin Orders Modal -->
     <div class="modal-backdrop" id="orders-modal">
-        <div class="modal-card-lg" style="max-width: 750px; padding: 25px; display: block; overflow-y: auto;">
+        <div class="modal-card-lg" style="max-width: 800px; padding: 25px; display: block; overflow-y: auto;">
             <div class="modal-close-icon" onclick="closeModal('orders-modal')">✕</div>
             <div class="modal-arabic-content">
                 <h3 style="color: var(--primary); text-align: center; margin-bottom: 15px;">قائمة طلبات الشراء 📥</h3>
@@ -771,6 +827,7 @@
                             <th style="padding: 10px;">الهاتف</th>
                             <th style="padding: 10px;">العنوان</th>
                             <th style="padding: 10px;">الإيصال</th>
+                            <th style="padding: 10px;">الحالة</th>
                         </tr>
                     </thead>
                     <tbody id="orders-table-body"></tbody>
@@ -796,6 +853,12 @@
 
         const PRODUCTS_BUCKET = 'products';
         const RECEIPTS_BUCKET = 'receipts';
+
+        // رقم واتساب صاحب البراند اللي هتوصله رسالة تأكيد كل أوردر جديد
+        const BRAND_OWNER_WHATSAPP = '201021307469';
+
+        // خيارات حالة الطلب
+        const ORDER_STATUSES = ['قيد التحضير', 'تم الشحن', 'تم الإلغاء'];
 
         window.catalogProducts = [];
         window.shoppingCart = [];
@@ -1018,16 +1081,23 @@
             document.getElementById('checkout-modal').style.display = 'flex';
         }
 
-        // إرسال طلب الشراء مع إيصال فودافون كاش
+        // إرسال طلب الشراء مع إيصال فودافون كاش + إشعار واتساب لصاحب البراند
         document.getElementById('orderForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const orderTitles = window.shoppingCart.map(item => item.name).join(', ');
             const totalSum = window.shoppingCart.reduce((acc, curr) => acc + Number(curr.price), 0);
             const receiptFile = document.getElementById('c-receipt').files[0];
 
+            const customerName = document.getElementById('c-name').value;
+            const customerPhone = document.getElementById('c-phone').value;
+            const customerAddress = document.getElementById('c-address').value;
+
             const submitBtn = document.getElementById('orderSubmitBtn');
             submitBtn.disabled = true;
             submitBtn.innerText = "جاري إرسال الطلب... 🚀";
+
+            // بنفتح تاب فاضي فورًا (Sync) عشان الموبايل ميمنعش الفتح التلقائي بعد الـ await
+            const waWindow = window.open('', '_blank');
 
             try {
                 let receiptUrl = '';
@@ -1038,13 +1108,32 @@
                 const { error } = await supabase.from('orders').insert({
                     product_name: orderTitles,
                     price: totalSum,
-                    customer_name: document.getElementById('c-name').value,
-                    phone: document.getElementById('c-phone').value,
-                    address: document.getElementById('c-address').value,
-                    receipt_url: receiptUrl
+                    customer_name: customerName,
+                    phone: customerPhone,
+                    address: customerAddress,
+                    receipt_url: receiptUrl,
+                    status: 'قيد التحضير'
                 });
 
                 if (error) throw error;
+
+                // تجهيز وفتح رسالة واتساب لصاحب البراند بتفاصيل الأوردر
+                const waText =
+                    `✅ تم تأكيد أوردر جديد على الموقع\n\n` +
+                    `👤 الاسم: ${customerName}\n` +
+                    `📞 الهاتف: ${customerPhone}\n` +
+                    `📍 العنوان: ${customerAddress}\n` +
+                    `🛍️ المنتجات: ${orderTitles}\n` +
+                    `💰 الإجمالي: ${totalSum} EGP` +
+                    (receiptUrl ? `\n🧾 إيصال التحويل: ${receiptUrl}` : '');
+
+                const waUrl = `https://wa.me/${BRAND_OWNER_WHATSAPP}?text=${encodeURIComponent(waText)}`;
+
+                if (waWindow) {
+                    waWindow.location.href = waUrl;
+                } else {
+                    window.open(waUrl, '_blank');
+                }
 
                 alert('تم استلام طلبك بنجاح! وسيتواصل معك فريق خدمة العملاء.');
                 window.shoppingCart = [];
@@ -1053,6 +1142,7 @@
                 document.getElementById('orderForm').reset();
             } catch (err) {
                 console.error(err);
+                if (waWindow) waWindow.close();
                 alert('حدث خطأ أثناء إرسال الطلب');
             } finally {
                 submitBtn.disabled = false;
@@ -1143,6 +1233,27 @@
             }
         }
 
+        function statusClass(status) {
+            if (status === 'تم الشحن') return 'status-shipped';
+            if (status === 'تم الإلغاء') return 'status-cancelled';
+            return 'status-prep';
+        }
+
+        window.updateOrderStatus = async function(orderId, newStatus, selectEl) {
+            try {
+                const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', orderId);
+                if (error) throw error;
+
+                if (selectEl) {
+                    selectEl.classList.remove('status-prep', 'status-shipped', 'status-cancelled');
+                    selectEl.classList.add(statusClass(newStatus));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('تعذر تحديث حالة الطلب. تأكد من وجود عمود status في جدول orders على Supabase.');
+            }
+        }
+
         window.fetchOrdersAdmin = async function() {
             try {
                 const { data, error } = await supabase
@@ -1156,12 +1267,13 @@
                 body.innerHTML = '';
 
                 if (!data || data.length === 0) {
-                    body.innerHTML = '<tr><td colspan="5" style="padding:15px;">لا توجد طلبات جديدة.</td></tr>';
+                    body.innerHTML = '<tr><td colspan="6" style="padding:15px;">لا توجد طلبات جديدة.</td></tr>';
                     document.getElementById('orders-modal').style.display = 'flex';
                     return;
                 }
 
                 data.forEach((o) => {
+                    const currentStatus = o.status || 'قيد التحضير';
                     const tr = document.createElement('tr');
                     tr.style.borderBottom = '1px solid #eee';
                     tr.innerHTML = `
@@ -1170,6 +1282,11 @@
                         <td style="padding:8px;">${o.phone}</td>
                         <td style="padding:8px;">${o.address}</td>
                         <td style="padding:8px;"><a href="${o.receipt_url}" target="_blank" style="color:var(--primary); font-weight:bold;">عرض الإيصال 🖼️</a></td>
+                        <td style="padding:8px;">
+                            <select class="status-select ${statusClass(currentStatus)}" onchange="updateOrderStatus('${o.id}', this.value, this)">
+                                ${ORDER_STATUSES.map(s => `<option value="${s}" ${s === currentStatus ? 'selected' : ''}>${s}</option>`).join('')}
+                            </select>
+                        </td>
                     `;
                     body.appendChild(tr);
                 });
