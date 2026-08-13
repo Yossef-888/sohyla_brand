@@ -444,7 +444,7 @@
             border-radius: 4px;
         }
 
-        /* Modals & Gallery Styling (تم تحديثها لتشمل خاصية التمرير العمودي) */
+        /* Modals & Gallery Styling */
         .modal-backdrop {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -464,7 +464,7 @@
             border-radius: 6px;
             position: relative;
             max-height: 85vh;
-            overflow-y: auto; /* السماح بالتمرير العمودي داخل النافذة */
+            overflow-y: auto;
             display: flex;
             box-shadow: 0 20px 50px rgba(0,0,0,0.2);
         }
@@ -540,7 +540,6 @@
             font-family: var(--font-arabic);
         }
 
-        /* Options inside Quick View */
         .option-picker-title {
             font-family: var(--font-arabic);
             font-size: 13px;
@@ -625,7 +624,6 @@
 
         .admin-drawer.active { left: 0; }
 
-        /* Order Status Badge / Select */
         .status-select {
             padding: 6px 8px;
             border-radius: 4px;
@@ -641,7 +639,6 @@
         .status-select.status-shipped { color: #15803d; border-color: #15803d; }
         .status-select.status-cancelled { color: #dc2626; border-color: #dc2626; }
 
-        /* Footer Signature */
         footer {
             background: #FFFFFF;
             border-top: 1px solid var(--border-light);
@@ -726,7 +723,7 @@
         <div class="catalog-grid" id="catalog-grid"></div>
     </main>
 
-    <!-- 🛒 سلة المشتريات -->
+    <!-- سلة المشتريات -->
     <div class="cart-drawer-overlay" id="cart-overlay" onclick="closeCartDrawer()"></div>
     <div class="cart-drawer" id="cart-drawer">
         <div class="drawer-header">
@@ -745,7 +742,7 @@
         </div>
     </div>
 
-    <!-- 🔍 Modal Quick View مع اختيار المقاس واللون -->
+    <!-- Modal Quick View -->
     <div class="modal-backdrop" id="details-modal">
         <div class="modal-card-lg">
             <div style="width: 100%; display: flex; flex-direction: row; flex-wrap: wrap;">
@@ -759,13 +756,11 @@
                     <div id="m-price-box" style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px;"></div>
                     <p id="m-desc" style="color: var(--text-muted); font-size: 13px; line-height: 1.6; margin-bottom: 15px;"></p>
                     
-                    <!-- اختيار المقاس -->
                     <div id="m-sizes-wrapper" class="hidden">
                         <div class="option-picker-title">اختر المقاس:</div>
                         <div class="sizes-container" id="m-sizes-list"></div>
                     </div>
 
-                    <!-- اختيار اللون -->
                     <div id="m-colors-wrapper" class="hidden">
                         <div class="option-picker-title">اختر اللون:</div>
                         <div class="colors-container" id="m-colors-list"></div>
@@ -777,7 +772,7 @@
         </div>
     </div>
 
-    <!-- ✏️ Modal تعديل المنتج -->
+    <!-- Modal تعديل المنتج -->
     <div class="modal-backdrop" id="edit-product-modal">
         <div class="modal-card-lg" style="max-width: 550px; padding: 30px; display: block;">
             <div class="modal-close-icon" onclick="closeModal('edit-product-modal')">✕</div>
@@ -804,7 +799,7 @@
                         <input type="text" id="edit-p-sizes" placeholder="S, M, L, XL">
                     </div>
                     <div class="form-group-ar">
-                        <label>الألوان (أسماء الألوان بالإنجليزية مثل: red, black أو كود مثل #000)</label>
+                        <label>الألوان (أسماء الألوان بالإنجليزية أو كود مثل #000)</label>
                         <input type="text" id="edit-p-colors" placeholder="red, black, #5A1827">
                     </div>
                     <div class="form-group-ar">
@@ -821,7 +816,7 @@
         </div>
     </div>
 
-    <!-- 📱 Modal الشراء وفودافون كاش -->
+    <!-- Modal الشراء وفودافون كاش -->
     <div class="modal-backdrop" id="checkout-modal">
         <div class="modal-card-lg" style="max-width: 550px; padding: 30px; display: block;">
             <div class="modal-close-icon" onclick="closeModal('checkout-modal')">✕</div>
@@ -856,7 +851,7 @@
         </div>
     </div>
 
-    <!-- 🛠️ Admin Sidebar -->
+    <!-- Admin Sidebar -->
     <div class="admin-drawer" id="admin-drawer">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
             <h3 style="color:var(--primary); font-family: var(--font-sans);">Admin Panel 🔒</h3>
@@ -939,7 +934,6 @@
         </div>
     </div>
 
-    <!-- Footer -->
     <footer>
         <p class="footer-credit">Designed & Developed by <strong>Youssef Morgan</strong></p>
     </footer>
@@ -1062,7 +1056,6 @@
                 ${hasSale ? `<span style="font-size: 16px; color: var(--text-muted); text-decoration: line-through;">${window.activeProduct.price} EGP</span>` : ''}
             `;
 
-            // معالجة المقاسات
             const sizesRaw = window.activeProduct.sizes || '';
             const sizesArr = sizesRaw ? sizesRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
             const sizesWrapper = document.getElementById('m-sizes-wrapper');
@@ -1078,7 +1071,6 @@
                 sizesWrapper.classList.add('hidden');
             }
 
-            // معالجة الألوان
             const colorsRaw = window.activeProduct.colors || '';
             const colorsArr = colorsRaw ? colorsRaw.split(',').map(c => c.trim()).filter(Boolean) : [];
             const colorsWrapper = document.getElementById('m-colors-wrapper');
@@ -1129,15 +1121,23 @@
             element.classList.add('active-thumb');
         }
 
+        // تم تحديث الدالة لتحديد المنتج المناسب بدقة تامة من مصفوفة المنتجات المعروضة
         window.openEditProductModal = function(index) {
-            const p = window.activeProduct || window.catalogProducts[index];
+            const p = window.catalogProducts[index];
+            if (!p) {
+                alert('تعذر العثور على بيانات المنتج');
+                return;
+            }
+            
             document.getElementById('edit-p-id').value = p.id;
-            document.getElementById('edit-p-name').value = p.name;
-            document.getElementById('edit-p-price').value = p.price;
+            document.getElementById('edit-p-name').value = p.name || '';
+            document.getElementById('edit-p-price').value = p.price || '';
             document.getElementById('edit-p-sale-price').value = p.sale_price || '';
             document.getElementById('edit-p-sizes').value = p.sizes || '';
             document.getElementById('edit-p-colors').value = p.colors || '';
             document.getElementById('edit-p-desc').value = p.desc || '';
+            document.getElementById('edit-p-images').value = '';
+
             document.getElementById('edit-product-modal').style.display = 'flex';
         }
 
