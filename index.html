@@ -1121,7 +1121,6 @@
             element.classList.add('active-thumb');
         }
 
-        // تم تحديث الدالة لتحديد المنتج المناسب بدقة تامة من مصفوفة المنتجات المعروضة
         window.openEditProductModal = function(index) {
             const p = window.catalogProducts[index];
             if (!p) {
@@ -1260,8 +1259,6 @@
             submitBtn.disabled = true;
             submitBtn.innerText = "جاري إرسال الطلب... 🚀";
 
-            const waWindow = window.open('', '_blank');
-
             try {
                 let receiptUrl = '';
                 if (receiptFile) {
@@ -1291,11 +1288,13 @@
 
                 const waUrl = `https://wa.me/${BRAND_OWNER_WHATSAPP}?text=${encodeURIComponent(waText)}`;
 
-                if (waWindow) {
-                    waWindow.location.href = waUrl;
-                } else {
-                    window.open(waUrl, '_blank');
-                }
+                // طريقة آمنة ومضمونة لفتح رابط واتساب تلقائياً وتجاوز مانع النوافذ المنبثقة
+                const link = document.createElement('a');
+                link.href = waUrl;
+                link.target = '_blank';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
 
                 alert('تم استلام طلبك بنجاح! وسيتواصل معك فريق خدمة العملاء.');
                 window.shoppingCart = [];
@@ -1304,7 +1303,6 @@
                 document.getElementById('orderForm').reset();
             } catch (err) {
                 console.error(err);
-                if (waWindow) waWindow.close();
                 alert('حدث خطأ أثناء إرسال الطلب');
             } finally {
                 submitBtn.disabled = false;
