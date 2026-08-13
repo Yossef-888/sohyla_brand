@@ -218,11 +218,25 @@
             transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
         .product-card:hover {
             transform: translateY(-6px);
             box-shadow: var(--shadow-hover);
+        }
+
+        .sale-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: #dc2626;
+            color: #fff;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 3px;
+            z-index: 10;
         }
 
         .card-image-box {
@@ -257,11 +271,23 @@
             margin-bottom: 8px;
         }
 
+        .product-price-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
         .product-price {
             font-size: 16px;
             font-weight: 700;
             color: var(--primary);
-            margin-bottom: 20px;
+        }
+
+        .product-old-price {
+            font-size: 14px;
+            color: var(--text-muted);
+            text-decoration: line-through;
         }
 
         .card-buttons {
@@ -390,6 +416,7 @@
 
         .cart-item-info { flex-grow: 1; }
         .cart-item-info h4 { font-size: 15px; font-weight: 700; }
+        .cart-item-info p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
         .cart-item-info span { font-size: 14px; color: var(--primary); font-weight: 800; }
 
         .drawer-footer {
@@ -509,6 +536,56 @@
             font-family: var(--font-arabic);
         }
 
+        /* Options inside Quick View */
+        .option-picker-title {
+            font-family: var(--font-arabic);
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            direction: rtl;
+            text-align: right;
+        }
+
+        .sizes-container, .colors-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            direction: rtl;
+        }
+
+        .size-pill {
+            padding: 6px 14px;
+            border: 1px solid var(--border-light);
+            background: #fff;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .size-pill.selected {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .color-circle {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 2px solid var(--border-light);
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .color-circle.selected {
+            transform: scale(1.15);
+            border-color: var(--primary);
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+
         .vodafone-banner {
             background: #E60000;
             color: white;
@@ -590,42 +667,15 @@
             .cart-drawer { width: 100%; }
         }
 
-        /* Mobile / Portrait header fix */
         @media (max-width: 600px) {
-            .nav-container {
-                padding: 14px 16px;
-                gap: 10px;
-            }
-
-            .nav-links {
-                display: none;
-            }
-
-            .brand-logo {
-                font-size: 20px;
-            }
-
-            .header-actions {
-                gap: 8px;
-            }
-
-            .whatsapp-link-btn {
-                padding: 7px 10px;
-                font-size: 12px;
-            }
-
-            .whatsapp-link-btn span.wa-text {
-                display: none;
-            }
-
-            .cart-trigger-btn {
-                padding: 7px 12px;
-                font-size: 12px;
-            }
-
-            .hero-title {
-                font-size: 32px;
-            }
+            .nav-container { padding: 14px 16px; gap: 10px; }
+            .nav-links { display: none; }
+            .brand-logo { font-size: 20px; }
+            .header-actions { gap: 8px; }
+            .whatsapp-link-btn { padding: 7px 10px; font-size: 12px; }
+            .whatsapp-link-btn span.wa-text { display: none; }
+            .cart-trigger-btn { padding: 7px 12px; font-size: 12px; }
+            .hero-title { font-size: 32px; }
         }
     </style>
 </head>
@@ -687,7 +737,7 @@
         </div>
     </div>
 
-    <!-- 🔍 Modal Quick View مع معرض الصور -->
+    <!-- 🔍 Modal Quick View مع اختيار المقاس واللون -->
     <div class="modal-backdrop" id="details-modal">
         <div class="modal-card-lg">
             <div class="modal-close-icon" onclick="closeModal('details-modal')">✕</div>
@@ -695,16 +745,29 @@
                 <img id="m-img" src="" alt="Product Image">
                 <div class="gallery-thumbnails" id="m-thumbnails"></div>
             </div>
-            <div class="modal-info-side">
-                <h2 id="m-title" style="font-family: var(--font-serif); font-size: 28px; margin-bottom: 10px;"></h2>
-                <div id="m-price" style="font-size: 22px; font-weight: 700; color: var(--primary); margin-bottom: 15px;"></div>
-                <p id="m-desc" style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 25px;"></p>
-                <button class="btn-cart-add" style="padding: 15px; font-size: 15px;" onclick="addCurrentProductToCart()">إضافة إلى السلة 🛒</button>
+            <div class="modal-info-side modal-arabic-content">
+                <h2 id="m-title" style="font-family: var(--font-serif); font-size: 26px; margin-bottom: 8px;"></h2>
+                <div id="m-price-box" style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px;"></div>
+                <p id="m-desc" style="color: var(--text-muted); font-size: 13px; line-height: 1.6; margin-bottom: 15px;"></p>
+                
+                <!-- اختيار المقاس -->
+                <div id="m-sizes-wrapper" class="hidden">
+                    <div class="option-picker-title">اختر المقاس:</div>
+                    <div class="sizes-container" id="m-sizes-list"></div>
+                </div>
+
+                <!-- اختيار اللون -->
+                <div id="m-colors-wrapper" class="hidden">
+                    <div class="option-picker-title">اختر اللون:</div>
+                    <div class="colors-container" id="m-colors-list"></div>
+                </div>
+
+                <button class="btn-cart-add" style="padding: 14px; font-size: 15px; margin-top: 10px;" onclick="addCurrentProductToCart()">إضافة إلى السلة 🛒</button>
             </div>
         </div>
     </div>
 
-    <!-- ✏️ Modal تعديل المنتج (Edit Product Modal) -->
+    <!-- ✏️ Modal تعديل المنتج -->
     <div class="modal-backdrop" id="edit-product-modal">
         <div class="modal-card-lg" style="max-width: 550px; padding: 30px; display: block;">
             <div class="modal-close-icon" onclick="closeModal('edit-product-modal')">✕</div>
@@ -716,13 +779,27 @@
                         <label>اسم المنتج</label>
                         <input type="text" id="edit-p-name" required>
                     </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div class="form-group-ar">
+                            <label>السعر الأساسي (قبل الخصم)</label>
+                            <input type="number" id="edit-p-price" required>
+                        </div>
+                        <div class="form-group-ar">
+                            <label>سعر الخصم (اختياري)</label>
+                            <input type="number" id="edit-p-sale-price" placeholder="مثال: 400">
+                        </div>
+                    </div>
                     <div class="form-group-ar">
-                        <label>السعر (EGP)</label>
-                        <input type="number" id="edit-p-price" required>
+                        <label>المقاسات (افصل بينها بفاصلة)</label>
+                        <input type="text" id="edit-p-sizes" placeholder="S, M, L, XL">
+                    </div>
+                    <div class="form-group-ar">
+                        <label>الألوان (أسماء الألوان بالإنجليزية مثل: red, black أو كود مثل #000)</label>
+                        <input type="text" id="edit-p-colors" placeholder="red, black, #5A1827">
                     </div>
                     <div class="form-group-ar">
                         <label>الوصف</label>
-                        <textarea id="edit-p-desc" rows="3"></textarea>
+                        <textarea id="edit-p-desc" rows="2"></textarea>
                     </div>
                     <div class="form-group-ar">
                         <label>تحديث الصور (اختياري)</label>
@@ -794,16 +871,30 @@
                 <label>Item Name</label>
                 <input type="text" id="p-name">
             </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div class="form-group-ar" style="direction:ltr; text-align:left;">
+                    <label>Price (EGP)</label>
+                    <input type="number" id="p-price">
+                </div>
+                <div class="form-group-ar" style="direction:ltr; text-align:left;">
+                    <label>Sale Price (Opt)</label>
+                    <input type="number" id="p-sale-price" placeholder="e.g. 400">
+                </div>
+            </div>
             <div class="form-group-ar" style="direction:ltr; text-align:left;">
-                <label>Price (EGP)</label>
-                <input type="number" id="p-price">
+                <label>Sizes (comma separated)</label>
+                <input type="text" id="p-sizes" placeholder="S, M, L, XL">
+            </div>
+            <div class="form-group-ar" style="direction:ltr; text-align:left;">
+                <label>Colors (comma separated)</label>
+                <input type="text" id="p-colors" placeholder="red, black, #C5A059">
             </div>
             <div class="form-group-ar" style="direction:ltr; text-align:left;">
                 <label>Description</label>
                 <textarea id="p-desc" style="width:100%; padding:10px; border:1px solid #eee;"></textarea>
             </div>
             <div class="form-group-ar" style="direction:ltr; text-align:left;">
-                <label>Upload Images (Select Multiple)</label>
+                <label>Upload Images (Multiple)</label>
                 <input type="file" id="p-imgs" multiple accept="image/*">
             </div>
             <button class="btn-cart-add" id="addProductBtn" style="width:100%; font-family:var(--font-sans);" onclick="addNewProduct()">Upload Item</button>
@@ -841,11 +932,10 @@
         <p class="footer-credit">Designed & Developed by <strong>Youssef Morgan</strong></p>
     </footer>
 
-    <!-- ربط Supabase وتشغيل المنطق المباشر -->
+    <!-- ربط Supabase وتشغيل المنطق -->
     <script type="module">
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-        // ⚠️ بيانات مشروعك على Supabase
         const SUPABASE_URL = 'https://msncdparyajnjtbbwotq.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_rY12VoVR2F6O7hLXMcWVIg_S9KLiQKH';
 
@@ -853,16 +943,14 @@
 
         const PRODUCTS_BUCKET = 'products';
         const RECEIPTS_BUCKET = 'receipts';
-
-        // رقم واتساب صاحب البراند اللي هتوصله رسالة تأكيد كل أوردر جديد
         const BRAND_OWNER_WHATSAPP = '201021307469';
-
-        // خيارات حالة الطلب
         const ORDER_STATUSES = ['قيد التحضير', 'تم الشحن', 'تم الإلغاء'];
 
         window.catalogProducts = [];
         window.shoppingCart = [];
         window.activeProduct = null;
+        window.selectedSize = '';
+        window.selectedColor = '';
         window.isAdminLoggedIn = false;
 
         window.openCartDrawer = function() {
@@ -883,7 +971,6 @@
             document.getElementById(modalId).style.display = 'none';
         }
 
-        // رفع صورة واحدة إلى Storage وإرجاع الرابط العام
         async function uploadImageToBucket(file, bucket) {
             const filePath = `${Date.now()}_${file.name}`;
             const { error: uploadError } = await supabase.storage.from(bucket).upload(filePath, file);
@@ -892,7 +979,6 @@
             return data.publicUrl;
         }
 
-        // جلب المنتجات من Supabase
         async function fetchProducts() {
             try {
                 const { data, error } = await supabase
@@ -901,9 +987,7 @@
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
-
                 window.catalogProducts = data || [];
-
                 const grid = document.getElementById('catalog-grid');
 
                 if (window.catalogProducts.length === 0) {
@@ -914,19 +998,26 @@
                 grid.innerHTML = window.catalogProducts.map((p, idx) => {
                     const imgs = p.images || [];
                     const coverImg = imgs.length > 0 ? imgs[0] : '';
+                    const hasSale = p.sale_price && Number(p.sale_price) > 0 && Number(p.sale_price) < Number(p.price);
+                    const displayPrice = hasSale ? p.sale_price : p.price;
+
                     return `
                     <div class="product-card">
+                        ${hasSale ? `<div class="sale-badge">SALE</div>` : ''}
                         <div class="card-image-box">
                             <img src="${coverImg}" alt="${p.name}">
                         </div>
                         <div class="card-content">
                             <div>
                                 <h3 class="product-name">${p.name}</h3>
-                                <div class="product-price">${p.price} EGP</div>
+                                <div class="product-price-box">
+                                    <span class="product-price">${displayPrice} EGP</span>
+                                    ${hasSale ? `<span class="product-old-price">${p.price} EGP</span>` : ''}
+                                </div>
                             </div>
                             <div class="card-buttons">
                                 <button class="btn-quick-view" onclick="openDetailsModal(${idx})">Quick View</button>
-                                <button class="btn-cart-add" onclick="addItemToCart(${idx})">سلة 🛒</button>
+                                <button class="btn-cart-add" onclick="openDetailsModal(${idx})">سلة 🛒</button>
                                 ${window.isAdminLoggedIn ? `
                                 <div class="admin-item-actions">
                                     <button class="btn-edit-item" onclick="openEditProductModal(${idx})">Edit ✏️</button>
@@ -945,10 +1036,51 @@
         window.openDetailsModal = function(index) {
             window.activeProduct = window.catalogProducts[index];
             const imagesList = window.activeProduct.images || [];
+            window.selectedSize = '';
+            window.selectedColor = '';
 
             document.getElementById('m-title').innerText = window.activeProduct.name;
-            document.getElementById('m-price').innerText = `${window.activeProduct.price} EGP`;
             document.getElementById('m-desc').innerText = window.activeProduct.desc || 'Exquisitely designed with high-quality fabric, tailored for elegance and refined styling.';
+
+            const hasSale = window.activeProduct.sale_price && Number(window.activeProduct.sale_price) > 0 && Number(window.activeProduct.sale_price) < Number(window.activeProduct.price);
+            const displayPrice = hasSale ? window.activeProduct.sale_price : window.activeProduct.price;
+
+            document.getElementById('m-price-box').innerHTML = `
+                <span style="font-size: 22px; font-weight: 700; color: var(--primary);">${displayPrice} EGP</span>
+                ${hasSale ? `<span style="font-size: 16px; color: var(--text-muted); text-decoration: line-through;">${window.activeProduct.price} EGP</span>` : ''}
+            `;
+
+            // معالجة المقاسات
+            const sizesRaw = window.activeProduct.sizes || '';
+            const sizesArr = sizesRaw ? sizesRaw.split(',').map(s => s.trim()).filter(Boolean) : [];
+            const sizesWrapper = document.getElementById('m-sizes-wrapper');
+            const sizesList = document.getElementById('m-sizes-list');
+
+            if (sizesArr.length > 0) {
+                sizesWrapper.classList.remove('hidden');
+                sizesList.innerHTML = sizesArr.map((sz, i) => `
+                    <div class="size-pill ${i === 0 ? 'selected' : ''}" onclick="selectSize('${sz}', this)">${sz}</div>
+                `).join('');
+                window.selectedSize = sizesArr[0];
+            } else {
+                sizesWrapper.classList.add('hidden');
+            }
+
+            // معالجة الألوان
+            const colorsRaw = window.activeProduct.colors || '';
+            const colorsArr = colorsRaw ? colorsRaw.split(',').map(c => c.trim()).filter(Boolean) : [];
+            const colorsWrapper = document.getElementById('m-colors-wrapper');
+            const colorsList = document.getElementById('m-colors-list');
+
+            if (colorsArr.length > 0) {
+                colorsWrapper.classList.remove('hidden');
+                colorsList.innerHTML = colorsArr.map((col, i) => `
+                    <div class="color-circle ${i === 0 ? 'selected' : ''}" style="background-color: ${col};" onclick="selectColor('${col}', this)" title="${col}"></div>
+                `).join('');
+                window.selectedColor = colorsArr[0];
+            } else {
+                colorsWrapper.classList.add('hidden');
+            }
 
             const mainImg = document.getElementById('m-img');
             const thumbContainer = document.getElementById('m-thumbnails');
@@ -966,6 +1098,18 @@
             document.getElementById('details-modal').style.display = 'flex';
         }
 
+        window.selectSize = function(size, el) {
+            window.selectedSize = size;
+            document.querySelectorAll('.size-pill').forEach(p => p.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        window.selectColor = function(color, el) {
+            window.selectedColor = color;
+            document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
         window.changeModalImage = function(src, element) {
             document.getElementById('m-img').src = src;
             const thumbs = document.querySelectorAll('.gallery-thumbnails img');
@@ -974,20 +1118,25 @@
         }
 
         window.openEditProductModal = function(index) {
-            const p = window.catalogProducts[index];
+            const p = window.activeProduct || window.catalogProducts[index];
             document.getElementById('edit-p-id').value = p.id;
             document.getElementById('edit-p-name').value = p.name;
             document.getElementById('edit-p-price').value = p.price;
+            document.getElementById('edit-p-sale-price').value = p.sale_price || '';
+            document.getElementById('edit-p-sizes').value = p.sizes || '';
+            document.getElementById('edit-p-colors').value = p.colors || '';
             document.getElementById('edit-p-desc').value = p.desc || '';
             document.getElementById('edit-product-modal').style.display = 'flex';
         }
 
-        // تعديل المنتج
         document.getElementById('editProductForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('edit-p-id').value;
             const name = document.getElementById('edit-p-name').value;
             const price = Number(document.getElementById('edit-p-price').value);
+            const sale_price = document.getElementById('edit-p-sale-price').value ? Number(document.getElementById('edit-p-sale-price').value) : null;
+            const sizes = document.getElementById('edit-p-sizes').value;
+            const colors = document.getElementById('edit-p-colors').value;
             const desc = document.getElementById('edit-p-desc').value;
             const fileInput = document.getElementById('edit-p-images');
 
@@ -996,7 +1145,7 @@
             submitBtn.innerText = "جاري التحديث... ⏳";
 
             try {
-                let updateData = { name, price, desc };
+                let updateData = { name, price, sale_price, sizes, colors, desc };
 
                 if (fileInput.files.length > 0) {
                     let imagesArray = [];
@@ -1022,15 +1171,18 @@
             }
         });
 
-        window.addItemToCart = function(index) {
-            window.shoppingCart.push(window.catalogProducts[index]);
-            updateCartUI();
-            openCartDrawer();
-        }
-
         window.addCurrentProductToCart = function() {
             if (window.activeProduct) {
-                window.shoppingCart.push(window.activeProduct);
+                const itemToAdd = {
+                    ...window.activeProduct,
+                    finalPrice: (window.activeProduct.sale_price && Number(window.activeProduct.sale_price) > 0 && Number(window.activeProduct.sale_price) < Number(window.activeProduct.price)) 
+                        ? window.activeProduct.sale_price 
+                        : window.activeProduct.price,
+                    chosenSize: window.selectedSize || 'Standard',
+                    chosenColor: window.selectedColor || 'Standard'
+                };
+
+                window.shoppingCart.push(itemToAdd);
                 updateCartUI();
                 window.closeModal('details-modal');
                 openCartDrawer();
@@ -1054,7 +1206,7 @@
             }
 
             container.innerHTML = window.shoppingCart.map((item, idx) => {
-                total += Number(item.price);
+                total += Number(item.finalPrice);
                 const imgs = item.images || [];
                 const thumb = imgs.length > 0 ? imgs[0] : '';
                 return `
@@ -1062,7 +1214,8 @@
                         <img src="${thumb}" alt="${item.name}">
                         <div class="cart-item-info">
                             <h4>${item.name}</h4>
-                            <span>${item.price} EGP</span>
+                            <p>المقاس: ${item.chosenSize} | اللون: <span style="display:inline-block; width:10px; height:10px; background:${item.chosenColor}; border-radius:50%; vertical-align:middle;"></span></p>
+                            <span>${item.finalPrice} EGP</span>
                         </div>
                         <button onclick="removeFromCart(${idx})" style="border:none; background:none; color:#dc2626; cursor:pointer; font-size:16px;">🗑️</button>
                     </div>
@@ -1081,11 +1234,10 @@
             document.getElementById('checkout-modal').style.display = 'flex';
         }
 
-        // إرسال طلب الشراء مع إيصال فودافون كاش + إشعار واتساب لصاحب البراند
         document.getElementById('orderForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const orderTitles = window.shoppingCart.map(item => item.name).join(', ');
-            const totalSum = window.shoppingCart.reduce((acc, curr) => acc + Number(curr.price), 0);
+            const orderDetailsList = window.shoppingCart.map(item => `${item.name} (مقاس: ${item.chosenSize}, لون: ${item.chosenColor})`).join(' | ');
+            const totalSum = window.shoppingCart.reduce((acc, curr) => acc + Number(curr.finalPrice), 0);
             const receiptFile = document.getElementById('c-receipt').files[0];
 
             const customerName = document.getElementById('c-name').value;
@@ -1096,7 +1248,6 @@
             submitBtn.disabled = true;
             submitBtn.innerText = "جاري إرسال الطلب... 🚀";
 
-            // بنفتح تاب فاضي فورًا (Sync) عشان الموبايل ميمنعش الفتح التلقائي بعد الـ await
             const waWindow = window.open('', '_blank');
 
             try {
@@ -1106,7 +1257,7 @@
                 }
 
                 const { error } = await supabase.from('orders').insert({
-                    product_name: orderTitles,
+                    product_name: orderDetailsList,
                     price: totalSum,
                     customer_name: customerName,
                     phone: customerPhone,
@@ -1117,13 +1268,12 @@
 
                 if (error) throw error;
 
-                // تجهيز وفتح رسالة واتساب لصاحب البراند بتفاصيل الأوردر
                 const waText =
                     `✅ تم تأكيد أوردر جديد على الموقع\n\n` +
                     `👤 الاسم: ${customerName}\n` +
                     `📞 الهاتف: ${customerPhone}\n` +
                     `📍 العنوان: ${customerAddress}\n` +
-                    `🛍️ المنتجات: ${orderTitles}\n` +
+                    `🛍️ المنتجات: ${orderDetailsList}\n` +
                     `💰 الإجمالي: ${totalSum} EGP` +
                     (receiptUrl ? `\n🧾 إيصال التحويل: ${receiptUrl}` : '');
 
@@ -1150,7 +1300,6 @@
             }
         });
 
-        // Admin Controls
         window.loginAdmin = function() {
             const user = document.getElementById('admin-user').value;
             const pass = document.getElementById('admin-pass').value;
@@ -1172,10 +1321,12 @@
             fetchProducts();
         }
 
-        // إضافة منتج جديد من لوحة التحكم المصغرة
         window.addNewProduct = async function() {
             const name = document.getElementById('p-name').value;
             const price = Number(document.getElementById('p-price').value);
+            const sale_price = document.getElementById('p-sale-price').value ? Number(document.getElementById('p-sale-price').value) : null;
+            const sizes = document.getElementById('p-sizes').value;
+            const colors = document.getElementById('p-colors').value;
             const desc = document.getElementById('p-desc').value;
             const fileInput = document.getElementById('p-imgs');
 
@@ -1198,6 +1349,9 @@
                 const { error } = await supabase.from('products').insert({
                     name,
                     price,
+                    sale_price,
+                    sizes,
+                    colors,
                     desc,
                     images: imagesArray
                 });
@@ -1208,6 +1362,9 @@
                 toggleAdminDrawer();
                 document.getElementById('p-name').value = '';
                 document.getElementById('p-price').value = '';
+                document.getElementById('p-sale-price').value = '';
+                document.getElementById('p-sizes').value = '';
+                document.getElementById('p-colors').value = '';
                 document.getElementById('p-desc').value = '';
                 fileInput.value = '';
                 fetchProducts();
@@ -1250,7 +1407,7 @@
                 }
             } catch (err) {
                 console.error(err);
-                alert('تعذر تحديث حالة الطلب. تأكد من وجود عمود status في جدول orders على Supabase.');
+                alert('تعذر تحديث حالة الطلب');
             }
         }
 
