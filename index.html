@@ -444,7 +444,7 @@
             border-radius: 4px;
         }
 
-        /* Modals & Gallery Styling */
+        /* Modals & Gallery Styling (تم تحديثها لتشمل خاصية التمرير العمودي) */
         .modal-backdrop {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -454,6 +454,7 @@
             display: none;
             justify-content: center;
             align-items: center;
+            padding: 15px;
         }
 
         .modal-card-lg {
@@ -461,24 +462,27 @@
             width: 90%;
             max-width: 850px;
             border-radius: 6px;
-            overflow: hidden;
             position: relative;
-            max-height: 90vh;
+            max-height: 85vh;
+            overflow-y: auto; /* السماح بالتمرير العمودي داخل النافذة */
             display: flex;
             box-shadow: 0 20px 50px rgba(0,0,0,0.2);
         }
 
         .modal-close-icon {
-            position: absolute;
-            top: 15px; right: 20px;
+            position: sticky;
+            top: 15px; 
+            left: 20px;
+            float: right;
             font-size: 22px;
             cursor: pointer;
             z-index: 10;
             color: #111;
-            background: rgba(255,255,255,0.8);
+            background: rgba(255,255,255,0.9);
             width: 35px; height: 35px;
             border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
+            margin: 15px 15px 0 0;
         }
 
         .modal-media-side {
@@ -488,7 +492,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 15px;
+            padding: 20px;
         }
 
         .modal-media-side img#m-img {
@@ -661,8 +665,12 @@
         .hidden { display: none !important; }
 
         @media (max-width: 768px) {
-            .modal-card-lg { flex-direction: column; }
-            .modal-media-side, .modal-info-side { width: 100%; }
+            .modal-card-lg { 
+                flex-direction: column; 
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            .modal-media-side, .modal-info-side { width: 100%; padding: 20px; }
             .modal-media-side { height: auto; }
             .cart-drawer { width: 100%; }
         }
@@ -740,29 +748,31 @@
     <!-- 🔍 Modal Quick View مع اختيار المقاس واللون -->
     <div class="modal-backdrop" id="details-modal">
         <div class="modal-card-lg">
-            <div class="modal-close-icon" onclick="closeModal('details-modal')">✕</div>
-            <div class="modal-media-side">
-                <img id="m-img" src="" alt="Product Image">
-                <div class="gallery-thumbnails" id="m-thumbnails"></div>
-            </div>
-            <div class="modal-info-side modal-arabic-content">
-                <h2 id="m-title" style="font-family: var(--font-serif); font-size: 26px; margin-bottom: 8px;"></h2>
-                <div id="m-price-box" style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px;"></div>
-                <p id="m-desc" style="color: var(--text-muted); font-size: 13px; line-height: 1.6; margin-bottom: 15px;"></p>
-                
-                <!-- اختيار المقاس -->
-                <div id="m-sizes-wrapper" class="hidden">
-                    <div class="option-picker-title">اختر المقاس:</div>
-                    <div class="sizes-container" id="m-sizes-list"></div>
+            <div style="width: 100%; display: flex; flex-direction: row; flex-wrap: wrap;">
+                <div class="modal-close-icon" onclick="closeModal('details-modal')">✕</div>
+                <div class="modal-media-side">
+                    <img id="m-img" src="" alt="Product Image">
+                    <div class="gallery-thumbnails" id="m-thumbnails"></div>
                 </div>
+                <div class="modal-info-side modal-arabic-content">
+                    <h2 id="m-title" style="font-family: var(--font-serif); font-size: 26px; margin-bottom: 8px;"></h2>
+                    <div id="m-price-box" style="display: flex; gap: 10px; align-items: center; margin-bottom: 12px;"></div>
+                    <p id="m-desc" style="color: var(--text-muted); font-size: 13px; line-height: 1.6; margin-bottom: 15px;"></p>
+                    
+                    <!-- اختيار المقاس -->
+                    <div id="m-sizes-wrapper" class="hidden">
+                        <div class="option-picker-title">اختر المقاس:</div>
+                        <div class="sizes-container" id="m-sizes-list"></div>
+                    </div>
 
-                <!-- اختيار اللون -->
-                <div id="m-colors-wrapper" class="hidden">
-                    <div class="option-picker-title">اختر اللون:</div>
-                    <div class="colors-container" id="m-colors-list"></div>
+                    <!-- اختيار اللون -->
+                    <div id="m-colors-wrapper" class="hidden">
+                        <div class="option-picker-title">اختر اللون:</div>
+                        <div class="colors-container" id="m-colors-list"></div>
+                    </div>
+
+                    <button class="btn-cart-add" style="padding: 14px; font-size: 15px; margin-top: 10px;" onclick="addCurrentProductToCart()">إضافة إلى السلة 🛒</button>
                 </div>
-
-                <button class="btn-cart-add" style="padding: 14px; font-size: 15px; margin-top: 10px;" onclick="addCurrentProductToCart()">إضافة إلى السلة 🛒</button>
             </div>
         </div>
     </div>
@@ -771,7 +781,7 @@
     <div class="modal-backdrop" id="edit-product-modal">
         <div class="modal-card-lg" style="max-width: 550px; padding: 30px; display: block;">
             <div class="modal-close-icon" onclick="closeModal('edit-product-modal')">✕</div>
-            <div class="modal-arabic-content">
+            <div class="modal-arabic-content" style="margin-top: 15px;">
                 <h3 style="color: var(--primary); text-align: center; font-size: 20px; margin-bottom: 15px;">تعديل بيانات المنتج ✏️</h3>
                 <form id="editProductForm">
                     <input type="hidden" id="edit-p-id">
@@ -815,7 +825,7 @@
     <div class="modal-backdrop" id="checkout-modal">
         <div class="modal-card-lg" style="max-width: 550px; padding: 30px; display: block;">
             <div class="modal-close-icon" onclick="closeModal('checkout-modal')">✕</div>
-            <div class="modal-arabic-content">
+            <div class="modal-arabic-content" style="margin-top: 15px;">
                 <h3 style="color: var(--primary); text-align: center; font-size: 22px; margin-bottom: 10px;">تفاصيل الشحن والدفع 📱</h3>
 
                 <div class="vodafone-banner">
@@ -906,23 +916,25 @@
 
     <!-- Admin Orders Modal -->
     <div class="modal-backdrop" id="orders-modal">
-        <div class="modal-card-lg" style="max-width: 800px; padding: 25px; display: block; overflow-y: auto;">
+        <div class="modal-card-lg" style="max-width: 800px; padding: 25px; display: block;">
             <div class="modal-close-icon" onclick="closeModal('orders-modal')">✕</div>
-            <div class="modal-arabic-content">
+            <div class="modal-arabic-content" style="margin-top: 15px;">
                 <h3 style="color: var(--primary); text-align: center; margin-bottom: 15px;">قائمة طلبات الشراء 📥</h3>
-                <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: center;">
-                    <thead>
-                        <tr style="background: var(--primary); color: white;">
-                            <th style="padding: 10px;">المنتجات</th>
-                            <th style="padding: 10px;">العميل</th>
-                            <th style="padding: 10px;">الهاتف</th>
-                            <th style="padding: 10px;">العنوان</th>
-                            <th style="padding: 10px;">الإيصال</th>
-                            <th style="padding: 10px;">الحالة</th>
-                        </tr>
-                    </thead>
-                    <tbody id="orders-table-body"></tbody>
-                </table>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: center; min-width: 600px;">
+                        <thead>
+                            <tr style="background: var(--primary); color: white;">
+                                <th style="padding: 10px;">المنتجات</th>
+                                <th style="padding: 10px;">العميل</th>
+                                <th style="padding: 10px;">الهاتف</th>
+                                <th style="padding: 10px;">العنوان</th>
+                                <th style="padding: 10px;">الإيصال</th>
+                                <th style="padding: 10px;">الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-table-body"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
