@@ -1007,30 +1007,43 @@
                     const hasSale = p.sale_price && Number(p.sale_price) > 0 && Number(p.sale_price) < Number(p.price);
                     const displayPrice = hasSale ? p.sale_price : p.price;
 
-                    return `
-                    <div class="product-card">
-                        ${hasSale ? `<div class="sale-badge">SALE</div>` : ''}
-                        <div class="card-image-box">
-                            <img src="${coverImg}" alt="${p.name}">
+                    const colorsArr = p.colors ? p.colors.split(',').map(c => c.trim()).filter(Boolean) : [];
+                    const colorCirclesHtml = colorsArr.length > 0 ? `
+                        <div style="display: flex; justify-content: center; gap: 6px; margin-top: 8px;">
+                            ${colorsArr.map(col => `<span style="width: 14px; height: 14px; background-color: ${col}; border-radius: 50%; border: 1px solid #ccc; display: inline-block;"></span>`).join('')}
                         </div>
-                        <div class="card-content">
+                    ` : '';
+
+                    return `
+                    <div class="product-card" style="position: relative; background: #fff; border: none; box-shadow: none;">
+                        ${hasSale ? `<div class="sale-badge" style="background: #dc2626; color: #fff; padding: 3px 8px; font-size: 10px; font-weight: 700; border-radius: 2px;">SALE</div>` : ''}
+                        
+                        <div class="card-image-box" style="height: 420px; cursor: pointer;" onclick="openDetailsModal(${idx})">
+                            <img src="${coverImg}" alt="${p.name}" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+
+                        <div class="card-content" style="padding: 15px 10px; text-align: center;">
                             <div>
-                                <h3 class="product-name">${p.name}</h3>
-                                <div class="product-price-box">
-                                    <span class="product-price">${displayPrice} EGP</span>
-                                    ${hasSale ? `<span class="product-old-price">${p.price} EGP</span>` : ''}
+                                <h3 class="product-name" style="font-family: var(--font-sans); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; color: #111; cursor: pointer;" onclick="openDetailsModal(${idx})">${p.name}</h3>
+                                
+                                <div class="product-price-box" style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                    ${hasSale ? `<span class="product-old-price" style="font-size: 12px; color: #999; text-decoration: line-through;">EGP ${p.price}</span>` : ''}
+                                    <span class="product-price" style="font-size: 13px; font-weight: 700; color: ${hasSale ? '#dc2626' : '#111'};">EGP ${displayPrice}</span>
                                 </div>
+
+                                ${colorCirclesHtml}
                             </div>
-                            <div class="card-buttons">
-                                <button class="btn-quick-view" onclick="openDetailsModal(${idx})">Quick View</button>
-                                <button class="btn-cart-add" onclick="openDetailsModal(${idx})">سلة 🛒</button>
-                                ${window.isAdminLoggedIn ? `
-                                <div class="admin-item-actions">
-                                    <button class="btn-edit-item" onclick="openEditProductModal(${idx})">Edit ✏️</button>
-                                    <button class="btn-delete-item" onclick="deleteProduct('${p.id}')">Delete 🗑️</button>
-                                </div>
-                                ` : ''}
+
+                            <button onclick="openDetailsModal(${idx})" style="position: absolute; bottom: 85px; right: 15px; background: #fff; border: none; width: 35px; height: 35px; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #111;">
+                                <i class="fa-solid fa-bag-shopping"></i>
+                            </button>
+
+                            ${window.isAdminLoggedIn ? `
+                            <div class="admin-item-actions" style="margin-top: 10px;">
+                                <button class="btn-edit-item" onclick="openEditProductModal(${idx})">Edit ✏️</button>
+                                <button class="btn-delete-item" onclick="deleteProduct('${p.id}')">Delete 🗑️</button>
                             </div>
+                            ` : ''}
                         </div>
                     </div>
                 `}).join('');
@@ -1288,7 +1301,6 @@
 
                 const waUrl = `https://wa.me/${BRAND_OWNER_WHATSAPP}?text=${encodeURIComponent(waText)}`;
 
-                // طريقة آمنة ومضمونة لفتح رابط واتساب تلقائياً وتجاوز مانع النوافذ المنبثقة
                 const link = document.createElement('a');
                 link.href = waUrl;
                 link.target = '_blank';
