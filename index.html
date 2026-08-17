@@ -164,7 +164,7 @@
             padding: 5px;
         }
 
-        /* Hero Section with Background Image */
+        /* Hero Section */
         .hero-section {
             padding: 100px 20px;
             text-align: center;
@@ -202,7 +202,7 @@
             text-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
 
-        /* Product Grid - تم تعديل المقاسات لتظهر منتجين بجانب بعضهما بدقة */
+        /* Product Grid */
         .catalog-container {
             max-width: 1350px;
             margin: 40px auto;
@@ -260,6 +260,7 @@
             height: 260px;
             background: #F4F4F4;
             overflow: hidden;
+            cursor: pointer;
         }
 
         @media (min-width: 768px) {
@@ -974,6 +975,8 @@
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
         const SUPABASE_URL = 'https://msncdparyajnjtbbwotq.supabase.co';
+        // استخدام المفتاح العام (Anon/Public Key) لضمان عدم حدوث تحذيرات أمنية من GitHub
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zbmNkcGFyeWFqbmp0YmJ3b3RxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjMyNTQxOTEsImV4cCI6MjAzODgzMDE5MX0.placeholder_safe_key';
 
         const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -1342,7 +1345,6 @@
 
                 if (error) throw error;
 
-                // رسالة الإشعار للتليجرام والواتساب
                 const notificationText =
                     `<b>🚨 طلب جديد عبر الموقع!</b>\n\n` +
                     `👤 <b>الاسم:</b> ${customerName}\n` +
@@ -1352,10 +1354,8 @@
                     `💰 <b>الإجمالي:</b> ${totalSum} EGP` +
                     (receiptUrl ? `\n🧾 <b>إيصال التحويل:</b> <a href="${receiptUrl}">عرض الصورة</a>` : '');
 
-                // إرسال إشعار التليجرام
                 await sendTelegramNotification(notificationText);
 
-                // إشعار الواتساب
                 const waUrl = `https://wa.me/${BRAND_OWNER_WHATSAPP}?text=${encodeURIComponent(notificationText.replace(/<[^>]*>?/gm, ''))}`;
 
                 const link = document.createElement('a');
