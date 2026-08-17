@@ -1549,54 +1549,7 @@
 
         document.addEventListener('DOMContentLoaded', fetchProducts);
         fetchProducts();
-// دالة الاستماع المباشر لتغيير حالة الطلب أو حذفه
-document.addEventListener('change', async function(e) {
-    if (e.target && e.target.classList.contains('status-select')) {
-        const selectEl = e.target;
-        const orderId = selectEl.getAttribute('data-id');
-        const newStatus = selectEl.value;
 
-        console.log("=== تم رصد تغيير الحالة عبر المستمع العام ===", orderId, newStatus);
-
-        try {
-            if (newStatus === 'تم الإلغاء') {
-                const confirmed = confirm('هل أنت متأكد من إلغاء هذا الطلب وحذفه نهائياً؟');
-                if (!confirmed) {
-                    fetchOrdersAdmin();
-                    return;
-                }
-
-                const { data, error } = await supabase
-                    .from('orders')
-                    .delete()
-                    .eq('id', orderId)
-                    .select();
-
-                if (error) {
-                    alert('فشل الحذف من قاعدة البيانات: ' + error.message);
-                    return;
-                }
-
-                alert('تم حذف الطلب بنجاح');
-                fetchOrdersAdmin();
-                return;
-            }
-
-            const { error } = await supabase
-                .from('orders')
-                .update({ status: newStatus })
-                .eq('id', orderId);
-
-            if (error) throw error;
-            
-            selectEl.className = `status-select ${statusClass(newStatus)}`;
-            fetchOrdersAdmin();
-        } catch (err) {
-            console.error("خطأ في التحديث:", err);
-            alert('تعذر تحديث حالة الطلب');
-        }
-    }
-});
     </script>
 </body>
 </html>
