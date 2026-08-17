@@ -164,7 +164,7 @@
             padding: 5px;
         }
 
-        /* Hero Section */
+        /* Hero Section with Background Image */
         .hero-section {
             padding: 100px 20px;
             text-align: center;
@@ -202,7 +202,7 @@
             text-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
 
-        /* Product Grid */
+        /* Product Grid - تم تعديل المقاسات لتظهر منتجين بجانب بعضهما بدقة */
         .catalog-container {
             max-width: 1350px;
             margin: 40px auto;
@@ -260,7 +260,6 @@
             height: 260px;
             background: #F4F4F4;
             overflow: hidden;
-            cursor: pointer;
         }
 
         @media (min-width: 768px) {
@@ -975,19 +974,13 @@
         import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
         const SUPABASE_URL = 'https://msncdparyajnjtbbwotq.supabase.co';
-        // استخدام المفتاح العام (Anon/Public Key) لضمان عدم حدوث تحذيرات أمنية من GitHub
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zbmNkcGFyeWFqbmp0YmJ3b3RxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjMyNTQxOTEsImV4cCI6MjAzODgzMDE5MX0.placeholder_safe_key';
+        const SUPABASE_KEY = 'sb_publishable_rY12VoVR2F6O7hLXMcWVIg_S9KLiQKH';
 
         const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const PRODUCTS_BUCKET = 'products';
         const RECEIPTS_BUCKET = 'receipts';
         const BRAND_OWNER_WHATSAPP = '201021307469';
-        
-        // إعدادات بوت التليجرام
-        const TELEGRAM_BOT_TOKEN = '8968473502:AAHKxKML-5rXbnKpc9e5bK-cWeMeNWs4Hhs';
-        const TELEGRAM_CHAT_ID = '6980001843';
-
         const ORDER_STATUSES = ['قيد التحضير', 'تم الشحن', 'تم الإلغاء'];
 
         window.catalogProducts = [];
@@ -1021,23 +1014,6 @@
             if (uploadError) throw uploadError;
             const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
             return data.publicUrl;
-        }
-
-        async function sendTelegramNotification(text) {
-            try {
-                const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-                await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: TELEGRAM_CHAT_ID,
-                        text: text,
-                        parse_mode: 'HTML'
-                    })
-                });
-            } catch (err) {
-                console.error("Telegram notification error:", err);
-            }
         }
 
         async function fetchProducts() {
@@ -1345,18 +1321,16 @@
 
                 if (error) throw error;
 
-                const notificationText =
-                    `<b>🚨 طلب جديد عبر الموقع!</b>\n\n` +
-                    `👤 <b>الاسم:</b> ${customerName}\n` +
-                    `📞 <b>الهاتف:</b> ${customerPhone}\n` +
-                    `📍 <b>العنوان:</b> ${customerAddress}\n` +
-                    `🛍️ <b>المنتجات:</b> ${orderDetailsList}\n` +
-                    `💰 <b>الإجمالي:</b> ${totalSum} EGP` +
-                    (receiptUrl ? `\n🧾 <b>إيصال التحويل:</b> <a href="${receiptUrl}">عرض الصورة</a>` : '');
+                const waText =
+                    `✅ تم تأكيد أوردر جديد على الموقع\n\n` +
+                    `👤 الاسم: ${customerName}\n` +
+                    `📞 الهاتف: ${customerPhone}\n` +
+                    `📍 العنوان: ${customerAddress}\n` +
+                    `🛍️ المنتجات: ${orderDetailsList}\n` +
+                    `💰 الإجمالي: ${totalSum} EGP` +
+                    (receiptUrl ? `\n🧾 إيصال التحويل: ${receiptUrl}` : '');
 
-                await sendTelegramNotification(notificationText);
-
-                const waUrl = `https://wa.me/${BRAND_OWNER_WHATSAPP}?text=${encodeURIComponent(notificationText.replace(/<[^>]*>?/gm, ''))}`;
+                const waUrl = `https://wa.me/${BRAND_OWNER_WHATSAPP}?text=${encodeURIComponent(waText)}`;
 
                 const link = document.createElement('a');
                 link.href = waUrl;
