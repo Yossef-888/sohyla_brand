@@ -202,7 +202,7 @@
             text-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
 
-        /* Product Grid - تم تعديل المقاسات لتظهر منتجين بجانب بعضهما بدقة */
+        /* Product Grid */
         .catalog-container {
             max-width: 1350px;
             margin: 40px auto;
@@ -945,7 +945,7 @@
         <div class="modal-card-lg" style="max-width: 800px; padding: 25px; display: block;">
             <div class="modal-close-icon" onclick="closeModal('orders-modal')">✕</div>
             <div class="modal-arabic-content" style="margin-top: 15px;">
-                <h3 style="color: var(--primary); text-align: center; margin-bottom: 15px;">قائمة طلبات الشراء 📥</h3>
+                <h3 id="orders-modal-title" style="color: var(--primary); text-align: center; margin-bottom: 15px;">قائمة طلبات الشراء 📥</h3>
                 <div style="overflow-x: auto;">
                     <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: center; min-width: 600px;">
                         <thead>
@@ -981,6 +981,11 @@
         const PRODUCTS_BUCKET = 'products';
         const RECEIPTS_BUCKET = 'receipts';
         const BRAND_OWNER_WHATSAPP = '201021307469';
+        
+        // بيانات بوت تيليجرام
+        const TELEGRAM_BOT_TOKEN = '8968473502:AAHKxKML-5rXbnKpc9e5bK-cWeMeNWs4Hhs';
+        const ADMIN_CHAT_ID = '6980001843';
+
         const ORDER_STATUSES = ['قيد التحضير', 'تم الشحن', 'تم الإلغاء'];
 
         window.catalogProducts = [];
@@ -1321,6 +1326,24 @@
 
                 if (error) throw error;
 
+                // إرسال إشعار تلقائي لتيليجرام بوت في الخلفية
+                const telegramMsg = `🚨 أوردر جديد في Sohyla Brand!\n\n` +
+                    `👤 الاسم: ${customerName}\n` +
+                    `📞 الهاتف: ${customerPhone}\n` +
+                    `📍 العنوان: ${customerAddress}\n` +
+                    `💰 الإجمالي: ${totalSum} EGP\n\n` +
+                    `🛍️ المنتجات:\n${orderDetailsList}` +
+                    (receiptUrl ? `\n\n🧾 رابط الإيصال: ${receiptUrl}` : '');
+
+                fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: ADMIN_CHAT_ID,
+                        text: telegramMsg
+                    })
+                }).catch(err => console.error("Telegram Error:", err));
+
                 const waText =
                     `✅ تم تأكيد أوردر جديد على الموقع\n\n` +
                     `👤 الاسم: ${customerName}\n` +
@@ -1451,6 +1474,19 @@
 
         window.updateOrderStatus = async function(orderId, newStatus, selectEl) {
             try {
+                if (newStatus === 'تم الإلغاء') {
+                    if (confirm('هل أنت متأكد من إلغاء هذا الطلب وحذفه نهائياً؟')) {
+                        const { error } = await supabase.from('orders').delete().eq('id', orderId);
+                        if (error) throw error;
+                        fetchOrdersAdmin(); // تحديث القائمة والعدد
+                        return;
+                    } else {
+                        // إرجاع القائمة السابقة لو تراجع
+                        fetchOrdersAdmin();
+                        return;
+                    }
+                }
+
                 const { error } = await supabase.from('orders').update({ status: newStatus }).eq('id', orderId);
                 if (error) throw error;
 
@@ -1475,6 +1511,9 @@
 
                 const body = document.getElementById('orders-table-body');
                 body.innerHTML = '';
+
+                const totalOrdersCount = data ? data.length : 0;
+                document.getElementById('orders-modal-title').innerText = `قائمة طلبات الشراء (عدد: ${totalOrdersCount}) 📥`;
 
                 if (!data || data.length === 0) {
                     body.innerHTML = '<tr><td colspan="6" style="padding:15px;">لا توجد طلبات جديدة.</td></tr>';
