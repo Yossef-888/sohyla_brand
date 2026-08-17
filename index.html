@@ -1549,6 +1549,47 @@
 
         document.addEventListener('DOMContentLoaded', fetchProducts);
         fetchProducts();
+window.updateOrderStatus = async function(orderId, newStatus, selectEl) {
+    console.log("=== تم استدعاء دالة تحديث/حذف الطلب ===");
+    console.log("Order ID:", orderId);
+    console.log("New Status:", newStatus);
+
+    try {
+        if (newStatus === 'تم الإلغاء') {
+            const confirmed = confirm('هل أنت متأكد من إلغاء هذا الطلب وحذفه نهائياً؟');
+            if (!confirmed) {
+                fetchOrdersAdmin();
+                return;
+            }
+
+            const { data, error } = await supabase
+                .from('orders')
+                .delete()
+                .eq('id', orderId)
+                .select();
+
+            if (error) {
+                alert('فشل الحذف من قاعدة البيانات: ' + error.message);
+                return;
+            }
+
+            alert('تم حذف الطلب بنجاح');
+            fetchOrdersAdmin();
+            return;
+        }
+
+        const { error } = await supabase
+            .from('orders')
+            .update({ status: newStatus })
+            .eq('id', orderId);
+
+        if (error) throw error;
+        fetchOrdersAdmin();
+    } catch (err) {
+        console.error("خطأ غير متوقع:", err);
+        alert('تعذر تحديث حالة الطلب');
+    }
+}
     </script>
 </body>
 </html>
