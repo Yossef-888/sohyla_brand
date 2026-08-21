@@ -984,7 +984,9 @@
         
         // بيانات بوت تيليجرام
         const TELEGRAM_BOT_TOKEN = '8968473502:AAHKxKML-5rXbnKpc9e5bK-cWeMeNWs4Hhs';
-        const ADMIN_CHAT_ID = '6980001843';
+        
+        // تم دمج الـ Chat IDs في مصفوفة ليصل الإشعار للاثنين معاً
+        const ADMIN_CHAT_IDS = ['6980001843', '5333942374'];
 
         const ORDER_STATUSES = ['قيد التحضير', 'تم الشحن', 'تم الإلغاء'];
 
@@ -1326,7 +1328,7 @@
 
                 if (error) throw error;
 
-                // إرسال إشعار تلقائي لتيليجرام بوت في الخلفية
+                // إرسال إشعار تلقائي لكل الـ Chat IDs في المصفوفة بالتوازي
                 const telegramMsg = `🚨 أوردر جديد في Sohyla Brand!\n\n` +
                     `👤 الاسم: ${customerName}\n` +
                     `📞 الهاتف: ${customerPhone}\n` +
@@ -1335,14 +1337,16 @@
                     `🛍️ المنتجات:\n${orderDetailsList}` +
                     (receiptUrl ? `\n\n🧾 رابط الإيصال: ${receiptUrl}` : '');
 
-                fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: ADMIN_CHAT_ID,
-                        text: telegramMsg
-                    })
-                }).catch(err => console.error("Telegram Error:", err));
+                ADMIN_CHAT_IDS.forEach(chatId => {
+                    fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chat_id: chatId,
+                            text: telegramMsg
+                        })
+                    }).catch(err => console.error("Telegram Error for ID:", chatId, err));
+                });
 
                 const waText =
                     `✅ تم تأكيد أوردر جديد على الموقع\n\n` +
